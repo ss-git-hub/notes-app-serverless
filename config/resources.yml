@@ -1,0 +1,97 @@
+Resources:
+
+  # ── CORS headers on API Gateway-level errors ─────────────────────────────────
+  # cors: true on each function only adds CORS headers to Lambda responses.
+  # When the Lambda Authorizer rejects a request (invalid/expired token), API
+  # Gateway returns a 401/403 itself — before Lambda runs — and those responses
+  # have no CORS headers by default. The browser then blocks the response.
+  # GatewayResponse resources fix this by injecting CORS headers on ALL
+  # API Gateway-generated error responses.
+  GatewayResponseDefault4XX:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+      ResponseType: DEFAULT_4XX
+      RestApiId:
+        Ref: ApiGatewayRestApi
+
+  GatewayResponseDefault5XX:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+      ResponseType: DEFAULT_5XX
+      RestApiId:
+        Ref: ApiGatewayRestApi
+
+  NotesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:provider.environment.NOTES_TABLE}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: noteId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: noteId
+          KeyType: RANGE
+
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:provider.environment.USERS_TABLE}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: email-index
+          KeySchema:
+            - AttributeName: email
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  # ── Refresh tokens table ──────────────────────────────────────────────────────
+  # Stores one item per active login session.
+  # Partition key is the token UUID — fast O(1) lookup on refresh/logout.
+  #
+  # TTL (Time To Live):
+  #   DynamoDB has a built-in TTL feature — you designate one numeric attribute
+  #   as the TTL attribute and DynamoDB automatically deletes items whose TTL
+  #   value (a Unix timestamp in seconds) has passed.
+  #   This means expired refresh tokens are cleaned up by AWS for free,
+  #   with no cron job, no cleanup Lambda, and no extra cost.
+  #   We set ttl = current time + 7 days when storing the token at login.
+  #
+  #   Note: TTL deletion is not instant — AWS processes it within 48 hours.
+  #   This is fine because the handler always checks the ttl value and
+  #   rejects tokens that are expired, even if DynamoDB hasn't cleaned them yet.
+  RefreshTokensTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:provider.environment.REFRESH_TOKENS_TABLE}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: token
+          AttributeType: S
+      KeySchema:
+        - AttributeName: token
+          KeyType: HASH
+      # Tell DynamoDB which attribute holds the TTL Unix timestamp.
+      # Items with ttl < current time will be automatically deleted.
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true

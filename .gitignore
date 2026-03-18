@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Serverless Framework build output and deployment artifacts
+# Contains compiled code, CloudFormation templates, and can contain
+# temporary credentials — never commit this
+.serverless/
+
+# TypeScript compiled output
+dist/
+build/
+
+# Environment variables — may contain secrets
+.env
+.env.local
+.env.*.local
+
+# Test coverage reports
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

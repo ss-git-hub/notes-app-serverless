@@ -1,0 +1,18 @@
+service: notes-app
+
+plugins:
+  - serverless-plugin-typescript
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  environment: ${file(config/environment.yml)}
+  iam:
+    role:
+      statements: ${file(config/iam.yml)}
+
+functions: ${file(config/functions.yml)}
+
+resources: ${file(config/resources.yml)}

@@ -1,0 +1,102 @@
+authorizer:
+  handler: authorizer/handler.verify
+
+registerUser: # your internal name — used in CLI commands
+  handler: users/register.handler # path/to/file.exportedFunction
+  events:
+    - http:
+        path: /users/register # your-url-path
+        method: post # http method
+        cors: true # enable CORS
+
+loginUser:
+  handler: users/login.handler
+  events:
+    - http:
+        path: /users/login
+        method: post
+        cors: true
+
+getProfile:
+  handler: users/getProfile.handler
+  events:
+    - http:
+        path: /users/profile
+        method: get
+        authorizer: authorizer # optional — omit for public routes
+        cors: true
+
+updateProfile:
+  handler: users/updateProfile.handler
+  events:
+    - http:
+        path: /users/profile
+        method: put
+        authorizer: authorizer
+        cors: true
+
+createNote:
+  handler: notes/create.handler
+  events:
+    - http:
+        path: /notes
+        method: post
+        authorizer: authorizer
+        cors: true
+
+getAllNotes:
+  handler: notes/getAll.handler
+  events:
+    - http:
+        path: /notes
+        method: get
+        authorizer: authorizer
+        cors: true
+
+getNote:
+  handler: notes/getOne.handler
+  events:
+    - http:
+        path: /notes/{id}
+        method: get
+        authorizer: authorizer
+        cors: true
+
+updateNote:
+  handler: notes/update.handler
+  events:
+    - http:
+        path: /notes/{id}
+        method: put
+        authorizer: authorizer
+        cors: true
+
+deleteNote:
+  handler: notes/delete.handler
+  events:
+    - http:
+        path: /notes/{id}
+        method: delete
+        authorizer: authorizer
+        cors: true
+
+# ── Token management ──────────────────────────────────────────────────────────
+# These two endpoints handle the refresh token lifecycle:
+#   refreshToken — issues a new access token using a valid refresh token
+#   logoutUser   — deletes the refresh token from DynamoDB, invalidating the session
+
+refreshToken:
+  handler: users/refresh.handler
+  events:
+    - http:
+        path: /users/refresh
+        method: post
+        cors: true # public — no authorizer, the refresh token IS the credential
+
+logoutUser:
+  handler: users/logout.handler
+  events:
+    - http:
+        path: /users/logout
+        method: post
+        cors: true # public — client sends the refresh token to invalidate

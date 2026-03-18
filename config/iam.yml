@@ -1,0 +1,15 @@
+- Effect: Allow
+  Action:
+    - dynamodb:PutItem
+    - dynamodb:GetItem
+    - dynamodb:UpdateItem
+    - dynamodb:DeleteItem
+    - dynamodb:Query
+  Resource:
+    - !GetAtt NotesTable.Arn
+    - !GetAtt UsersTable.Arn
+    - !Sub "${UsersTable.Arn}/index/email-index"
+    # Grant the same permissions on the RefreshTokensTable.
+    # The refresh and logout Lambdas need GetItem (lookup) and
+    # DeleteItem (logout) and PutItem (login — stores the token).
+    - !GetAtt RefreshTokensTable.Arn

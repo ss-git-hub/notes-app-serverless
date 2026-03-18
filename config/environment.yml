@@ -1,0 +1,7 @@
+NOTES_TABLE: ${self:service}-${sls:stage}-notes
+USERS_TABLE: ${self:service}-${sls:stage}-users
+# New table for storing refresh tokens — see shared/types.ts RefreshToken
+REFRESH_TOKENS_TABLE: ${self:service}-${sls:stage}-refresh-tokens
+JWT_SECRET: ${ssm:/notes-app/jwt-secret}
+STAGE: ${sls:stage}
+AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
