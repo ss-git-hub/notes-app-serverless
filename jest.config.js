@@ -29,5 +29,7 @@ module.exports = {
   // Clear mocks automatically between each test — prevents state leaking
   // from one test into another. Equivalent to calling jest.clearAllMocks()
   // in a beforeEach without having to write it manually.
-  clearMocks: true
+  clearMocks: true,
+  // Global setup file — runs before every test file
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts']
 };
