@@ -424,17 +424,29 @@ npx tsc --noEmit
 ```
 
 ## Install and Configure AWS
+
+```bash
 npm install -g aws-cli
+```
 
-# Configure with your IAM user keys
+Configure with your IAM user keys:
+
+```bash
 aws configure
+```
 
-# It will ask:
-# AWS Access Key ID:     (from the .csv you downloaded)
-# AWS Secret Access Key: (from the .csv)
-# Default region:        us-east-1
-# Default output format: json
+It will prompt for:
 
-# Verify it works
+```
+AWS Access Key ID:     (from the .csv you downloaded)
+AWS Secret Access Key: (from the .csv)
+Default region:        us-east-1
+Default output format: json
+```
+
+Verify it works:
+
+```bash
 aws sts get-caller-identity
 # Should return your account ID and user ARN
+```
